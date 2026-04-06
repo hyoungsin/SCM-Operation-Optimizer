@@ -1,6 +1,6 @@
-import { formatNumber } from "../../types/runState";
+import { formatMillions } from "../../types/runState";
 
-export function SolvePanel({ state, solveAllowed, onSolve }) {
+export function SolvePanel({ state, solveAllowed, onSolve, onLoadResult }) {
   return (
     <section className="panel">
       <h2>Solve</h2>
@@ -8,7 +8,7 @@ export function SolvePanel({ state, solveAllowed, onSolve }) {
       <div className="grid">
         <div className="row">
           <strong>Run ID</strong>
-            <span>{state.runId || "-"}</span>
+          <span>{state.displayRunId || "-"}</span>
         </div>
         <div className="row">
           <strong>Validation Gate</strong>
@@ -19,6 +19,11 @@ export function SolvePanel({ state, solveAllowed, onSolve }) {
         <button className="button" type="button" onClick={onSolve} disabled={!solveAllowed || state.solveLoading}>
           {state.solveLoading ? "Solving..." : "Solve 실행"}
         </button>
+        {state.solveSummary && (
+          <button className="button next-step" type="button" onClick={onLoadResult} disabled={state.resultLoading}>
+            {state.resultLoading ? "Loading Result..." : "결과 조회"}
+          </button>
+        )}
       </div>
       {state.solveError && <p className="error-text">{state.solveError}</p>}
       {state.solveSummary && (
@@ -33,7 +38,7 @@ export function SolvePanel({ state, solveAllowed, onSolve }) {
           </div>
           <div className="metric-card">
             <span>Objective</span>
-            <strong>{formatNumber(state.solveSummary.objective_value)}</strong>
+            <strong>{formatMillions(state.solveSummary.objective_value)}</strong>
           </div>
           <div className="metric-card">
             <span>Time</span>

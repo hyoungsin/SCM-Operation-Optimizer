@@ -39,6 +39,18 @@ input {
   margin-bottom: 20px;
 }
 
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.panel-header h2 {
+  margin: 0;
+}
+
 .stepper {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -126,6 +138,24 @@ input {
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 
+.upload-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.upload-box {
+  border: 1px solid #d9e3ea;
+  border-radius: 12px;
+  padding: 16px;
+  background: #f8fbfc;
+}
+
+.upload-box h3 {
+  margin-top: 0;
+}
+
 .metric-card {
   border: 1px solid #d9e3ea;
   border-radius: 12px;
@@ -174,6 +204,10 @@ input {
 
 .button.secondary {
   background: #7b8c9b;
+}
+
+.button.next-step {
+  background: #7b1e3a;
 }
 
 .button:disabled {
@@ -226,5 +260,9 @@ input {
 @media (max-width: 720px) {
   .wizard-stepper {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .upload-grid {
+    grid-template-columns: 1fr;
   }
 }

@@ -1,11 +1,19 @@
 from pydantic import BaseModel
 
 
+class UploadStatus(BaseModel):
+    pull_input_data_uploaded: bool
+    item_delivery_uploaded: bool
+
+
 class UploadResponse(BaseModel):
     run_id: str
+    display_run_id: str
     filename: str
     upload_time: str
     next_step: str
+    upload_type: str
+    upload_status: UploadStatus
 
 
 class ValidationSummary(BaseModel):
@@ -41,6 +49,15 @@ class KpiSummary(BaseModel):
     total_air_cost: float
 
 
+class AllocationMetrics(BaseModel):
+    alloc_total: float
+    alloc_by_model: dict[str, float]
+    gap_by_model: dict[str, float]
+    score_by_model: dict[str, int]
+    weight_by_model: dict[str, float]
+    weighted_total_score: float
+
+
 class SolveResponse(BaseModel):
     run_id: str
     solve_executed: bool
@@ -49,6 +66,7 @@ class SolveResponse(BaseModel):
     objective_value: float
     solving_time: float
     kpi_summary: KpiSummary
+    allocation_metrics: AllocationMetrics
 
 
 class ResultTableRow(BaseModel):
@@ -69,4 +87,5 @@ class ResultResponse(BaseModel):
     objective_value: float
     solving_time: float
     kpi_summary: KpiSummary
+    allocation_metrics: AllocationMetrics
     tables: ResultTables

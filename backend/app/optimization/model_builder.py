@@ -1,4 +1,6 @@
-from pyomo.environ import ConcreteModel, Constraint, NonNegativeReals, Objective, Param, Set, Var, maximize
+from pyomo.environ import ConcreteModel, Constraint, NonNegativeReals, Param, Set, Var
+
+from app.optimization.objective import add_option2_objective
 
 
 def build_model(model_input: dict[str, object]) -> ConcreteModel:
@@ -8,10 +10,7 @@ def build_model(model_input: dict[str, object]) -> ConcreteModel:
     weeks = model_input["weeks"]
     resources = model_input["resources"]
     week_index = {week: index for index, week in enumerate(weeks)}
-    previous_week = {
-        week: weeks[index - 1] if index > 0 else None
-        for index, week in enumerate(weeks)
-    }
+    previous_week = {week: weeks[index - 1] if index > 0 else None for index, week in enumerate(weeks)}
 
     model.PRODUCTS = Set(initialize=products, ordered=True)
     model.WEEKS = Set(initialize=weeks, ordered=True)
@@ -31,6 +30,13 @@ def build_model(model_input: dict[str, object]) -> ConcreteModel:
     model.fixed_shipment_launch = Param(model.PRODUCTS, model.WEEKS, initialize=model_input["fixed_shipment_launch"], default=0)
     model.resource_of = Param(model.PRODUCTS, initialize=model_input["resource_map"], default="")
     model.capacity = Param(model.RESOURCES, model.WEEKS, initialize=model_input["capacity"], default=0)
+    model.demand_total_by_product = Param(
+        model.PRODUCTS, initialize=model_input["demand_total_by_product"], default=0
+    )
+    model.revenue_upper_bound = Param(
+        model.PRODUCTS, initialize=model_input["revenue_upper_bound_by_product"], default=0
+    )
+    model.total_demand = Param(initialize=model_input["total_demand"], default=0)
 
     model.fulfill = Var(model.PRODUCTS, model.WEEKS, within=NonNegativeReals)
     model.shortage = Var(model.PRODUCTS, model.WEEKS, within=NonNegativeReals)
@@ -107,13 +113,5 @@ def build_model(model_input: dict[str, object]) -> ConcreteModel:
     model.fulfill_limit = Constraint(model.PRODUCTS, model.WEEKS, rule=fulfill_limit_rule)
     model.resource_capacity = Constraint(model.RESOURCES, model.WEEKS, rule=resource_capacity_rule)
 
-    def objective_rule(m: ConcreteModel) -> Objective:
-        return sum(
-            m.price[product] * m.demand_priority[week] * m.fulfill[product, week]
-            - m.air_cost[product] * m.air_ship[product, week]
-            for product in m.PRODUCTS
-            for week in m.WEEKS
-        )
-
-    model.objective = Objective(rule=objective_rule, sense=maximize)
+    add_option2_objective(model)
     return model

@@ -17,6 +17,9 @@ REQUIRED_SHEETS = [
     "demand-priority",
 ]
 
+PULL_INPUT_REQUIRED_SHEETS = [sheet for sheet in REQUIRED_SHEETS if sheet != "item-delivery"]
+ITEM_DELIVERY_REQUIRED_SHEETS = ["item-delivery"]
+
 WEEK_COLUMN_PATTERN = re.compile(r"^w\d+$", re.IGNORECASE)
 KNOWN_NUMERIC_COLUMNS = {
     "price",

@@ -115,6 +115,8 @@ def _prepare_model_input(normalized_sheets: dict[str, dict[str, object]]) -> dic
     init_inventory: dict[str, float] = {}
     delivery: dict[tuple[str, str], float] = {}
     price: dict[str, float] = {}
+    demand_total_by_product: dict[str, float] = {}
+    revenue_upper_bound_by_product: dict[str, float] = {}
     air_cost: dict[str, float] = {}
     air_enabled: dict[str, int] = {}
     air_leadtime: dict[str, int] = {}
@@ -172,9 +174,15 @@ def _prepare_model_input(normalized_sheets: dict[str, dict[str, object]]) -> dic
         regular_enabled[product] = 1 if regular_route_leadtimes else 0
         regular_leadtime[product] = min(regular_route_leadtimes) if regular_route_leadtimes else 0
 
+        demand_total = 0.0
+        revenue_upper_bound = 0.0
         for week in weeks:
             demand[(product, week)] = float(demand_row.get(week, 0) or 0)
             delivery[(product, week)] = float(delivery_row.get(week, 0) or 0)
+            demand_total += demand[(product, week)]
+            revenue_upper_bound += price[product] * demand_priority[week] * demand[(product, week)]
+        demand_total_by_product[product] = demand_total
+        revenue_upper_bound_by_product[product] = revenue_upper_bound
 
     for resource_name in resources:
         capacity_row = capacity_by_resource.get(resource_name, {})
@@ -189,6 +197,9 @@ def _prepare_model_input(normalized_sheets: dict[str, dict[str, object]]) -> dic
         "delivery": delivery,
         "init_inventory": init_inventory,
         "price": price,
+        "total_demand": sum(demand_total_by_product.values()),
+        "demand_total_by_product": demand_total_by_product,
+        "revenue_upper_bound_by_product": revenue_upper_bound_by_product,
         "demand_priority": demand_priority,
         "air_cost": air_cost,
         "air_enabled": air_enabled,
@@ -245,4 +256,5 @@ def run_solve(run_id: str) -> SolveResponse | None:
         objective_value=solve_result["objective_value"],
         solving_time=solve_result["solving_time"],
         kpi_summary=solve_result["kpi_summary"],
+        allocation_metrics=solve_result["allocation_metrics"],
     )

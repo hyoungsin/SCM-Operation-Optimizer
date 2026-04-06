@@ -23,5 +23,6 @@ def get_result(run_id: str) -> ResultResponse | None:
         objective_value=solve_summary["objective_value"],
         solving_time=solve_summary["solving_time"],
         kpi_summary=solve_summary["kpi_summary"],
+        allocation_metrics=solve_summary["allocation_metrics"],
         tables=result_tables,
     )
