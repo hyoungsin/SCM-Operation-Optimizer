@@ -32,10 +32,9 @@ Try it out
 Execute
 
 <git push방법> 
+cd D:\BIG\codex\SCM-MILP-PoC
+git remote -v
 git status
 git add .
 git commit -m "2nd version"
-git branch --show-current
-git push
-git push -u origin SCM-Operation-Optimizer
 git push -u origin main

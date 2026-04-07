@@ -49,7 +49,7 @@ export const useScmRunStore = create((set, get) => ({
   },
 
   async uploadPullInput(file) {
-    set({ uploadLoading: true, uploadError: "" });
+    set({ uploadLoading: true, uploadLoadingType: "pull", uploadError: "" });
     try {
       const uploaded = await uploadPullInputWorkbook(file);
       set({
@@ -63,10 +63,11 @@ export const useScmRunStore = create((set, get) => ({
         currentStatus: "pull_input_uploaded",
         activeStep: "Upload",
         uploadLoading: false,
+        uploadLoadingType: "",
       });
       return uploaded;
     } catch (error) {
-      set({ uploadLoading: false, uploadError: error.message });
+      set({ uploadLoading: false, uploadLoadingType: "", uploadError: error.message });
       throw error;
     }
   },
@@ -77,7 +78,7 @@ export const useScmRunStore = create((set, get) => ({
       throw new Error("Please upload pull-input-data first.");
     }
 
-    set({ uploadLoading: true, uploadError: "" });
+    set({ uploadLoading: true, uploadLoadingType: "item", uploadError: "" });
     try {
       const uploaded = await uploadItemDeliveryWorkbook(runId, file);
       set({
@@ -101,10 +102,11 @@ export const useScmRunStore = create((set, get) => ({
         resultError: "",
         activeStep: "Validation",
         uploadLoading: false,
+        uploadLoadingType: "",
       });
       return uploaded;
     } catch (error) {
-      set({ uploadLoading: false, uploadError: error.message });
+      set({ uploadLoading: false, uploadLoadingType: "", uploadError: error.message });
       throw error;
     }
   },

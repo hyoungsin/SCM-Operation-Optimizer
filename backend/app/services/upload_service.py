@@ -6,31 +6,13 @@ from pathlib import Path
 from fastapi import HTTPException, UploadFile
 
 from app.core.config import UPLOAD_DIR
-from app.parsers.excel_parser import get_workbook_sheet_names
 from app.repository.run_repository import create_run, get_run, update_run
 from app.schemas.common import UploadResponse
-from app.validators.input_validator import ITEM_DELIVERY_REQUIRED_SHEETS, PULL_INPUT_REQUIRED_SHEETS
 
 
 def _save_file(file: UploadFile, destination: Path) -> None:
     with destination.open("wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
-
-
-def _validate_sheet_layout(file_path: Path, expected_sheets: list[str], label: str) -> None:
-    sheet_names = get_workbook_sheet_names(file_path)
-    existing = set(sheet_names)
-    expected = set(expected_sheets)
-    missing = [sheet for sheet in expected_sheets if sheet not in existing]
-    unexpected = [sheet for sheet in sheet_names if sheet not in expected]
-
-    if missing or unexpected:
-        details: list[str] = [f"{label} workbook sheet layout is invalid."]
-        if missing:
-            details.append(f"Missing sheets: {', '.join(missing)}.")
-        if unexpected:
-            details.append(f"Unexpected sheets: {', '.join(unexpected)}.")
-        raise HTTPException(status_code=400, detail=" ".join(details))
 
 
 def _build_filename(run: dict[str, object]) -> str:
@@ -49,7 +31,6 @@ async def save_pull_input_upload(file: UploadFile) -> UploadResponse:
     UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
     _save_file(file, destination)
-    _validate_sheet_layout(destination, PULL_INPUT_REQUIRED_SHEETS, "pull-input-data")
 
     create_run(
         run_id=run_id,
@@ -82,7 +63,6 @@ async def save_item_delivery_upload(run_id: str, file: UploadFile) -> UploadResp
     UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
     _save_file(file, destination)
-    _validate_sheet_layout(destination, ITEM_DELIVERY_REQUIRED_SHEETS, "item-delivery update")
 
     update_run(
         run_id,

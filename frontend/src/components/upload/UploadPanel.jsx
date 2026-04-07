@@ -6,6 +6,8 @@ export function UploadPanel({ state, onUploadPullInput, onUploadItemDelivery }) 
 
   const pullUploaded = Boolean(state.uploadStatus?.pull_input_data_uploaded);
   const itemUploaded = Boolean(state.uploadStatus?.item_delivery_uploaded);
+  const pullUploading = state.uploadLoading && state.uploadLoadingType === "pull";
+  const itemUploading = state.uploadLoading && state.uploadLoadingType === "item";
 
   async function handlePullInputSubmit(event) {
     event.preventDefault();
@@ -29,18 +31,18 @@ export function UploadPanel({ state, onUploadPullInput, onUploadItemDelivery }) 
       <p>VS-OLAP Data에 이슈자재의 공급계획을 추가로 upload해주세요.</p>
       <div className="grid summary-grid">
         <div className="metric-card">
-          <span>VS-OLAP</span>
+          <span>VS-OLAP(Batch)</span>
           <strong>{state.pullInputFilename || "No File"}</strong>
         </div>
         <div className="metric-card">
-          <span>item delivery plan</span>
+          <span>Item Delivery Plan (Upload)</span>
           <strong>{state.itemDeliveryFilename || "No File"}</strong>
         </div>
       </div>
 
       <div className="upload-grid">
         <form className="upload-box" onSubmit={handlePullInputSubmit}>
-          <h3>1. VS-OLAP</h3>
+          <h3>1. VS-OLAP(Batch)</h3>
           <input
             type="file"
             accept=".xlsx"
@@ -52,13 +54,13 @@ export function UploadPanel({ state, onUploadPullInput, onUploadItemDelivery }) 
               type="submit"
               disabled={state.uploadLoading}
             >
-              {state.uploadLoading ? "Uploading..." : "Upload VS-OLAP"}
+              {pullUploading ? "Uploading..." : "Upload VS-OLAP(Batch)"}
             </button>
           </div>
         </form>
 
         <form className="upload-box" onSubmit={handleItemDeliverySubmit}>
-          <h3>2. item delivery plan</h3>
+          <h3>2. Item Delivery Plan (Upload)</h3>
           <input
             type="file"
             accept=".xlsx"
@@ -71,7 +73,7 @@ export function UploadPanel({ state, onUploadPullInput, onUploadItemDelivery }) 
               type="submit"
               disabled={!state.runId || state.uploadLoading}
             >
-              {state.uploadLoading ? "Uploading..." : "Upload item delivery plan"}
+              {itemUploading ? "Uploading..." : "Upload Item Delivery Plan (Upload)"}
             </button>
           </div>
         </form>

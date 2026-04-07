@@ -13,6 +13,7 @@ export function createInitialRunState() {
     uploadTime: "",
     currentStatus: "idle",
     uploadLoading: false,
+    uploadLoadingType: "",
     uploadError: "",
     validation: null,
     validationLoading: false,
@@ -35,6 +36,9 @@ export function createInitialRunState() {
 export const STEP_SEQUENCE = ["Upload", "Validation", "Review", "Solve", "Result", "Report"];
 
 export function getRunStatusLabel(state) {
+  if (state.uploadLoading) {
+    return "Uploading";
+  }
   if (!state.uploadStatus?.pull_input_data_uploaded && !state.uploadStatus?.item_delivery_uploaded) {
     return "Upload";
   }

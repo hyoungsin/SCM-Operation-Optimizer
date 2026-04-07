@@ -99,7 +99,7 @@ export function ScmMilpWizardPage() {
         <div className="panel-header">
           <h2>Run Summary</h2>
           <button className="button secondary" type="button" onClick={handleReset}>
-            Reset
+            Clear
           </button>
         </div>
         <div className="grid summary-grid">

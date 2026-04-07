@@ -102,6 +102,8 @@ def _prepare_model_input(normalized_sheets: dict[str, dict[str, object]]) -> dic
 
     weeks = _sort_weeks(week_columns)
     demand_by_product = _build_row_map(demand_rows)
+    products = sorted(demand_by_product.keys())
+    product_set = set(products)
     price_by_product = _build_row_map(price_rows)
     inventory_by_product = _build_row_map(inventory_rows)
     delivery_by_product = _build_row_map(delivery_rows)
@@ -109,7 +111,6 @@ def _prepare_model_input(normalized_sheets: dict[str, dict[str, object]]) -> dic
     resource_by_product = _build_sheet_key_map(resource_rows)
     capacity_by_resource = _build_sheet_key_map(capacity_rows)
     demand_priority = _build_priority_map(priority_rows, weeks)
-    products = sorted(demand_by_product.keys())
 
     demand: dict[tuple[str, str], float] = {}
     init_inventory: dict[str, float] = {}
@@ -133,20 +134,25 @@ def _prepare_model_input(normalized_sheets: dict[str, dict[str, object]]) -> dic
         if str(row.get("model-bod", "")).strip()
     }
     shipment_routes_by_product: dict[str, set[str]] = {}
+    ignored_shipment_models: set[str] = set()
 
     for row in shipment_rows:
         product = str(row.get("model-site", "")).strip()
         route = str(row.get("from-to", "")).strip()
-        if product and route:
-            shipment_routes_by_product.setdefault(product, set()).add(route)
-            for week in weeks:
-                qty = _safe_float(row.get(week), 0.0)
-                fixed_shipment_launch[(product, week)] = fixed_shipment_launch.get((product, week), 0.0) + qty
-                if qty > 0:
-                    fixed_horizon_index[product] = max(
-                        fixed_horizon_index.get(product, -1),
-                        int(week[1:]),
-                    )
+        if not product or not route:
+            continue
+        if product not in product_set:
+            ignored_shipment_models.add(product)
+            continue
+        shipment_routes_by_product.setdefault(product, set()).add(route)
+        for week in weeks:
+            qty = _safe_float(row.get(week), 0.0)
+            fixed_shipment_launch[(product, week)] = fixed_shipment_launch.get((product, week), 0.0) + qty
+            if qty > 0:
+                fixed_horizon_index[product] = max(
+                    fixed_horizon_index.get(product, -1),
+                    int(week[1:]),
+                )
 
     for product in products:
         demand_row = demand_by_product[product]
@@ -210,6 +216,7 @@ def _prepare_model_input(normalized_sheets: dict[str, dict[str, object]]) -> dic
         "fixed_shipment_launch": fixed_shipment_launch,
         "resource_map": resource_map,
         "capacity": capacity,
+        "ignored_models": sorted(ignored_shipment_models),
     }
 
 
